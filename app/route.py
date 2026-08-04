@@ -1,9 +1,8 @@
 from fastapi import APIRouter
 from app.models import Task
+from app.database import cursor, connection
 
 router = APIRouter()
-
-from app.database import cursor, connection
 
 
 @router.get("/")
@@ -21,7 +20,7 @@ def get_tasks():
 @router.post("/tasks")
 def create_task(task: Task):
     cursor.execute(
-        "INSERT INTO tasks (task) VALUES (?)",
+        "INSERT INTO tasks (task) VALUES (%s)",
         (task.task,)
     )
     connection.commit()
@@ -31,10 +30,11 @@ def create_task(task: Task):
         "task": task.task
     }
 
+
 @router.put("/tasks/{task_id}")
 def update_task(task_id: int, task: Task):
     cursor.execute(
-        "UPDATE tasks SET task = ? WHERE id = ?",
+        "UPDATE tasks SET task = %s WHERE id = %s",
         (task.task, task_id)
     )
     connection.commit()
@@ -50,13 +50,19 @@ def update_task(task_id: int, task: Task):
 
 @router.delete("/tasks/{task_id}")
 def delete_task(task_id: int):
-    cursor.execute("SELECT task FROM tasks WHERE id = ?", (task_id,))
+    cursor.execute(
+        "SELECT task FROM tasks WHERE id = %s",
+        (task_id,)
+    )
     task = cursor.fetchone()
 
     if task is None:
         return {"error": "Task not found"}
 
-    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    cursor.execute(
+        "DELETE FROM tasks WHERE id = %s",
+        (task_id,)
+    )
     connection.commit()
 
     return {
