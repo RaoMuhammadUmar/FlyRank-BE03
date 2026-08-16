@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from app.supabase_client import supabase
 
 app = FastAPI()
 
