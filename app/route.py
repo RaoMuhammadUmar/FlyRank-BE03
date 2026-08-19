@@ -1,9 +1,20 @@
 from fastapi import APIRouter
-from app.models import Task
+from app.models import Task, AuthRequest
 from app.database import cursor, connection
+from app.supabase_client import supabase
 
 router = APIRouter()
+@router.post("/auth/signup", status_code=201)
+def signup(request: AuthRequest):
+    response = supabase.auth.sign_up({
+        "email": request.email,
+        "password": request.password
+    })
 
+    return {
+        "message": "User created successfully",
+        "user": response.user
+    }
 
 @router.get("/")
 def root():
